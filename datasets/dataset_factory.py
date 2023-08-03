@@ -8,3 +8,6 @@ datasets_map = {'pascal': pascal}
 
 
 def get_dataset(name, split_name, dataset_dir, file_pattern=None, reader=None):
+  """Given a dataset name and a split_name returns a Dataset. """
+  if name not in datasets_map:
+    raise ValueError('Name of dataset unknown %s
