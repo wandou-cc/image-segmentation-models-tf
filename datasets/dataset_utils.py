@@ -14,4 +14,12 @@ from six.moves import urllib
 _RANDOM_SEED = 0
 
 
-def parse_glob(
+def parse_glob(path):
+  """ returns a file path, or an empty string """
+  try:
+    return glob2.glob(path)[0]
+  except IndexError:
+    return ""
+
+
+def _int64_feature(value):
