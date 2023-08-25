@@ -23,3 +23,7 @@ def parse_glob(path):
 
 
 def _int64_feature(value):
+  """Wrapper for inserting int64 features into Example proto."""
+  if not isinstance(value, list):
+    value = [value]
+  return tf.train.Fe
