@@ -26,4 +26,9 @@ def _int64_feature(value):
   """Wrapper for inserting int64 features into Example proto."""
   if not isinstance(value, list):
     value = [value]
-  return tf.train.Fe
+  return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
+
+
+def _bytes_feature(value):
+  """Wrapper for inserting bytes features into Example proto."""
+  return tf.train.Featur
