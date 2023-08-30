@@ -38,4 +38,6 @@ def tfrecord(image, mask, height, width, channels):
   """Build an Example proto for an example.
 
     Args:
-      filename: st
+      filename: string, path to an image file, e.g., '/path/to/example.JPG'
+      image: string, JPEG encoding of RGB image
+      height: integer, image height in 
