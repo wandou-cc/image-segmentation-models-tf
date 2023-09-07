@@ -50,4 +50,7 @@ def tfrecord(image, mask, height, width, channels):
 
   example = tf.train.Example(features=tf.train.Features(feature={
       'image/height': _int64_feature(height),
-      'image/width':
+      'image/width': _int64_feature(width),
+      'image/channels': _int64_feature(channels),
+      'image/encoded': _bytes_feature(image),
+      'image
