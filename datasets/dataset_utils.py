@@ -53,4 +53,10 @@ def tfrecord(image, mask, height, width, channels):
       'image/width': _int64_feature(width),
       'image/channels': _int64_feature(channels),
       'image/encoded': _bytes_feature(image),
-      'image
+      'image/mask/encoded': _bytes_feature(mask)
+  }))
+  return example
+
+
+class ImageReader(object):
+  """Helper class that provides TensorFlow image cod
