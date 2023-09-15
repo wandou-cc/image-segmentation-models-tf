@@ -59,4 +59,8 @@ def tfrecord(image, mask, height, width, channels):
 
 
 class ImageReader(object):
-  """Helper class that provides TensorFlow image cod
+  """Helper class that provides TensorFlow image coding utilities."""
+
+  def __init__(self):
+    # Initializes function that decodes RGB JPEG data.
+    self._decode_jpeg_d
