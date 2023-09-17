@@ -63,4 +63,7 @@ class ImageReader(object):
 
   def __init__(self):
     # Initializes function that decodes RGB JPEG data.
-    self._decode_jpeg_d
+    self._decode_jpeg_data = tf.placeholder(dtype=tf.string)
+    self._decode_jpeg = tf.image.decode_jpeg(self._decode_jpeg_data, channels=3)
+
+  def decode_image(self, sess, imag
