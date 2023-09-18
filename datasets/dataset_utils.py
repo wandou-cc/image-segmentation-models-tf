@@ -66,4 +66,9 @@ class ImageReader(object):
     self._decode_jpeg_data = tf.placeholder(dtype=tf.string)
     self._decode_jpeg = tf.image.decode_jpeg(self._decode_jpeg_data, channels=3)
 
-  def decode_image(self, sess, imag
+  def decode_image(self, sess, image):
+    image = sess.run(self._decode_jpeg,
+                     feed_dict={self._decode_jpeg_data: image})
+    height = image.shape[0]
+    width = image.shape[1]
+    
