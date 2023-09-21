@@ -71,4 +71,7 @@ class ImageReader(object):
                      feed_dict={self._decode_jpeg_data: image})
     height = image.shape[0]
     width = image.shape[1]
-    
+    channels = image.shape[2]
+    # some sanity checking
+    assert len(image.shape) == 3
+    assert channels == 3  # TODO(BDD) : Support other sets of ch
