@@ -81,4 +81,9 @@ class ImageReader(object):
 
 
 def get_filenames(dataset_dir, split_name, shard_id):
-  output_fi
+  output_filename = '%s_%05d.tfrecord' % (split_name, shard_id)
+  return os.path.join(dataset_dir, output_filename)
+
+
+def is_png(filename):
+  """Determi
