@@ -74,4 +74,11 @@ class ImageReader(object):
     channels = image.shape[2]
     # some sanity checking
     assert len(image.shape) == 3
-    assert channels == 3  # TODO(BDD) : Support other sets of ch
+    assert channels == 3  # TODO(BDD) : Support other sets of channels
+    assert width != 0
+    assert height != 0
+    return height, width, channels
+
+
+def get_filenames(dataset_dir, split_name, shard_id):
+  output_fi
