@@ -86,4 +86,9 @@ def get_filenames(dataset_dir, split_name, shard_id):
 
 
 def is_png(filename):
-  """Determi
+  """Determine if a file contains a PNG format image."""
+  return '.png' in filename
+
+
+def is_jpg(filename):
+  """Determine if a file contains a JPG f
