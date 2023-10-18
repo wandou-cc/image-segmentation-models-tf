@@ -91,4 +91,10 @@ def is_png(filename):
 
 
 def is_jpg(filename):
-  """Determine if a file contains a JPG f
+  """Determine if a file contains a JPG format image."""
+  return '.jpg' in filename
+
+
+def file_matches(file_name, file_hash):
+  if not tf.gfile.Exists(file_name):
+  
