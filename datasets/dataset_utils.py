@@ -97,4 +97,7 @@ def is_jpg(filename):
 
 def file_matches(file_name, file_hash):
   if not tf.gfile.Exists(file_name):
-  
+    return False
+  with open(file_name) as file_to_check:
+    md5_returned = hashlib.md5(file_to_check.read()).hexdigest()
+    return md5_returned == fil
