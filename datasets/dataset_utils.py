@@ -106,4 +106,7 @@ def file_matches(file_name, file_hash):
 def dataset_exists(dataset_dir):
   for split_name in ['train', 'validation']:
     for shard_id in range(_NUM_SHARDS):
-  
+      out_filename = get_filenames(dataset_dir, split_name, shard_id)
+      if not tf.gfile.Exists(out_filename):
+        return False
+  return True
