@@ -100,4 +100,10 @@ def file_matches(file_name, file_hash):
     return False
   with open(file_name) as file_to_check:
     md5_returned = hashlib.md5(file_to_check.read()).hexdigest()
-    return md5_returned == fil
+    return md5_returned == file_hash
+
+
+def dataset_exists(dataset_dir):
+  for split_name in ['train', 'validation']:
+    for shard_id in range(_NUM_SHARDS):
+  
