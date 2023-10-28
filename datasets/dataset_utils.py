@@ -110,3 +110,9 @@ def dataset_exists(dataset_dir):
       if not tf.gfile.Exists(out_filename):
         return False
   return True
+
+
+def cleanup_directory(dataset_dir):
+  """Removes temporary files used to create the dataset."""
+  filename = _DATA_URL.split('/')[-1]
+  fil
