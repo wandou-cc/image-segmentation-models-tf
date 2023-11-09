@@ -115,4 +115,8 @@ def dataset_exists(dataset_dir):
 def cleanup_directory(dataset_dir):
   """Removes temporary files used to create the dataset."""
   filename = _DATA_URL.split('/')[-1]
-  fil
+  filepath = os.path.join(dataset_dir, filename)
+  tf.gfile.Remove(filepath)
+  tmp_dir = os.path.join(dataset_dir, _VOC_ROOT)
+  tf.gfile.DeleteRecursively(tmp_dir)
+
