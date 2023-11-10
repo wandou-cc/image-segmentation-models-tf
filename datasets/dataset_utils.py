@@ -120,3 +120,7 @@ def cleanup_directory(dataset_dir):
   tmp_dir = os.path.join(dataset_dir, _VOC_ROOT)
   tf.gfile.DeleteRecursively(tmp_dir)
 
+
+def download(dataset_url, dataset_hash, dataset_dir):
+  filename = dataset_url.split('/')[-1]
+  filepath = os.path.join(dataset_di
