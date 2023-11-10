@@ -123,4 +123,8 @@ def cleanup_directory(dataset_dir):
 
 def download(dataset_url, dataset_hash, dataset_dir):
   filename = dataset_url.split('/')[-1]
-  filepath = os.path.join(dataset_di
+  filepath = os.path.join(dataset_dir, filename)
+
+  def _progress(count, block_size, total_size):
+    sys.stdout.write('\r>> Downloading %s %.1f%%' % (filename,
+                                     
