@@ -131,4 +131,6 @@ def download(dataset_url, dataset_hash, dataset_dir):
                                                      float(total_size) * 100.0))
     sys.stdout.flush()
 
-  
+  if not file_matches(filepath, dataset_hash):
+    print("%s not found, downloading it!" % filepath)
+    filepath, _ = urllib.request.urlre
