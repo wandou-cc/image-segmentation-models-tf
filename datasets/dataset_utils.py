@@ -133,4 +133,6 @@ def download(dataset_url, dataset_hash, dataset_dir):
 
   if not file_matches(filepath, dataset_hash):
     print("%s not found, downloading it!" % filepath)
-    filepath, _ = urllib.request.urlre
+    filepath, _ = urllib.request.urlretrieve(dataset_url, filepath, _progress)
+    statinfo = os.stat(filepath)
+    print('Successfully downloaded', filename, statinfo.st_si
