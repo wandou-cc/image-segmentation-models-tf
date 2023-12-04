@@ -73,3 +73,43 @@ def _convert_dataset(split_name, img_fns, mask_fns, dataset_dir):
 
 
 def _dataset_exists(dataset_dir):
+  for split_name in ['train', 'validation']:
+    for shard_id in range(_NUM_SHARDS):
+      out_fns = dataset_utils.get_filenames(dataset_dir, split_name, shard_id)
+      if not tf.gfile.Exists(out_fns):
+        return False
+  return True
+
+
+def run(dataset_dir):
+  """Runs the download and conversion operation."""
+  if not tf.gfile.Exists(dataset_dir):
+    tf.gfile.MakeDirs(dataset_dir)
+
+  if _dataset_exists(dataset_dir):
+    print('Dataset files already exist. Exiting without re-creating them.')
+    return
+
+  dataset_utils.download(_DATA_URL, _DATA_MD5, dataset_dir)
+  images, masks = get_images_and_masks(dataset_dir)
+
+  # Divide into train and test:
+  #
+  # TODO(BDD): replace with precut train/val/test tests in folder
+  #
+  random.seed(_RANDOM_SEED)
+  random.shuffle(images)
+  random.shuffle(masks)
+
+  train_imgs = images[_NUM_VALIDATION:]
+  val_imgs = images[:_NUM_VALIDATION]
+  train_masks = masks[_NUM_VALIDATION:]
+  val_masks = masks[:_NUM_VALIDATION]
+
+  # First, convert the training and validation sets.
+  _convert_dataset('train', train_imgs, train_masks, dataset_dir)
+  _convert_dataset('validation', val_imgs, val_masks, dataset_dir)
+
+  # TODO(BDD) : renable cleanup when working
+  #_clean_up_temporary_files(dataset_dir)
+  print('\nFinished converting the PASCAL-VOC dataset!')
