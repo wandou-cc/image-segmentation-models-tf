@@ -10,4 +10,6 @@ slim = tf.contrib.slim
 
 _FILE_PATTERN = '%s_*.tfrecord'
 _CLASS_NAMES = [
-    'background', 'aeroplane', 'bicycle', 'bir
+    'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
+    'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
+    'person', 'potted-plant', 's
