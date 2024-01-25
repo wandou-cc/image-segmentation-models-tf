@@ -20,4 +20,10 @@ SPLITS_TO_SIZES = {'train': 3320, 'validation': 350}
 
 _NUM_CLASSES = 21
 
-_ITE
+_ITEMS_TO_DESCRIPTIONS = {
+    'image': 'A color image of varying size.',
+    'label': 'Ground truth segmentation mask',
+}
+
+
+def get_split(split_
