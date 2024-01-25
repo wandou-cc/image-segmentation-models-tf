@@ -26,4 +26,6 @@ _ITEMS_TO_DESCRIPTIONS = {
 }
 
 
-def get_split(split_
+def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
+  if split_name not in SPLITS_TO_SIZES:
+    raise ValueError('split na
