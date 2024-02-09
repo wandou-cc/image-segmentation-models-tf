@@ -32,4 +32,8 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
 
   if not file_pattern:
     file_pattern = _FILE_PATTERN
-  file_pattern = os.path.join(dataset_dir, 
+  file_pattern = os.path.join(dataset_dir, file_pattern % split_name)
+  print(file_pattern)
+  # Allowing None in the signature so that dataset_factory can use the
+  # default.
+  if reader i
