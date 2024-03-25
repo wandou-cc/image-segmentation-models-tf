@@ -51,4 +51,11 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
               (), tf.string, default_value=''),
       'image/mask/format':
           tf.FixedLenFeature(
-              (), tf.string, default_v
+              (), tf.string, default_value='png'),
+  }
+
+  items_to_handlers = {
+      'image':
+          slim.tfexample_decoder.Image(),
+      'label':
+          slim.tfexample_de
