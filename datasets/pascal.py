@@ -47,3 +47,8 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
           tf.FixedLenFeature(
               (), tf.string, default_value='jpeg'),
       'image/mask/encoded':
+          tf.FixedLenFeature(
+              (), tf.string, default_value=''),
+      'image/mask/format':
+          tf.FixedLenFeature(
+              (), tf.string, default_v
