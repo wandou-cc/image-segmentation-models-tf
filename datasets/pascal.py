@@ -58,4 +58,8 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
       'image':
           slim.tfexample_decoder.Image(),
       'label':
-          slim.tfexample_de
+          slim.tfexample_decoder.Image(
+              'image/mask/encoded', 'image/mask/format', channels=1),
+  }
+
+  decoder = slim.tfexample_decoder.TFExampl
