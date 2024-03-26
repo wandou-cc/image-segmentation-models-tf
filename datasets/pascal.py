@@ -66,4 +66,10 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
                                                     items_to_handlers)
 
   # TODO(bdd): name labels
-  label
+  labels_to_names = None
+
+  return slim.dataset.Dataset(
+      data_sources=file_pattern,
+      reader=reader,
+      decoder=decoder,
+      num_samples
