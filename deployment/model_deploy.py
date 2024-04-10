@@ -418,3 +418,145 @@ def _sum_clones_gradients(clone_grads):
 
       Returns:
          List of tuples of (gradient, variable) where the gradient has been summed
+         across all clones.
+      """
+    sum_grads = []
+    for grad_and_vars in zip(*clone_grads):
+        # Note that each grad_and_vars looks like the following:
+        #   ((grad_var0_clone0, var0), ... (grad_varN_cloneN, varN))
+        grads = []
+        var = grad_and_vars[0][1]
+        for g, v in grad_and_vars:
+            assert v == var
+            if g is not None:
+                grads.append(g)
+        if grads:
+            if len(grads) > 1:
+                sum_grad = tf.add_n(grads, name=var.op.name + '/sum_grads')
+            else:
+                sum_grad = grads[0]
+            sum_grads.append((sum_grad, var))
+    return sum_grads
+
+
+def _add_gradients_summaries(grads_and_vars):
+    """Add histogram summaries to gradients.
+
+      Note: The summaries are also added to the SUMMARIES collection.
+
+      Args:
+        grads_and_vars: A list of gradient to variable pairs (tuples).
+
+      Returns:
+        The _list_ of the added summaries for grads_and_vars.
+      """
+    summaries = []
+    for grad, var in grads_and_vars:
+        if grad is not None:
+            if isinstance(grad, tf.IndexedSlices):
+                grad_values = grad.values
+            else:
+                grad_values = grad
+            summaries.append(
+                tf.histogram_summary(var.op.name + ':gradient', grad_values))
+            summaries.append(
+                tf.histogram_summary(var.op.name + ':gradient_norm',
+                                     tf.global_norm([grad_values])))
+        else:
+            tf.logging.info('Var %s has no gradient', var.op.name)
+    return summaries
+
+
+class DeploymentConfig(object):
+    """Configuration for deploying a model with `deploy()`.
+
+      You can pass an instance of this class to `deploy()` to specify exactly
+      how to deploy the model to build.  If you do not pass one, an instance built
+      from the default deployment_hparams will be used.
+      """
+
+    def __init__(self,
+                 num_clones=1,
+                 clone_on_cpu=False,
+                 replica_id=0,
+                 num_replicas=1,
+                 num_ps_tasks=0,
+                 worker_job_name='worker',
+                 ps_job_name='ps'):
+        """Create a DeploymentConfig.
+
+            The config describes how to deploy a model across multiple clones and
+            replicas.  The model will be replicated `num_clones` times in each replica.
+            If `clone_on_cpu` is True, each clone will placed on CPU.
+
+            If `num_replicas` is 1, the model is deployed via a single process.  In that
+            case `worker_device`, `num_ps_tasks`, and `ps_device` are ignored.
+
+            If `num_replicas` is greater than 1, then `worker_device` and `ps_device`
+            must specify TensorFlow devices for the `worker` and `ps` jobs and
+            `num_ps_tasks` must be positive.
+
+            Args:
+              num_clones: Number of model clones to deploy in each replica.
+              clone_on_cpu: If True clones would be placed on CPU.
+              replica_id: Integer.  Index of the replica for which the model is
+                deployed.  Usually 0 for the chief replica.
+              num_replicas: Number of replicas to use.
+              num_ps_tasks: Number of tasks for the `ps` job. 0 to not use replicas.
+              worker_job_name: A name for the worker job.
+              ps_job_name: A name for the parameter server job.
+
+            Raises:
+              ValueError: If the arguments are invalid.
+            """
+        if num_replicas > 1:
+            if num_ps_tasks < 1:
+                raise ValueError(
+                    'When using replicas num_ps_tasks must be positive')
+        if num_replicas > 1 or num_ps_tasks > 0:
+            if not worker_job_name:
+                raise ValueError(
+                    'Must specify worker_job_name when using replicas')
+            if not ps_job_name:
+                raise ValueError(
+                    'Must specify ps_job_name when using parameter server')
+        if replica_id >= num_replicas:
+            raise ValueError('replica_id must be less than num_replicas')
+        self._num_clones = num_clones
+        self._clone_on_cpu = clone_on_cpu
+        self._replica_id = replica_id
+        self._num_replicas = num_replicas
+        self._num_ps_tasks = num_ps_tasks
+        self._ps_device = '/job:' + ps_job_name if num_ps_tasks > 0 else ''
+        self._worker_device = '/job:' + worker_job_name if num_ps_tasks > 0 else ''
+
+    @property
+    def num_clones(self):
+        return self._num_clones
+
+    @property
+    def clone_on_cpu(self):
+        return self._clone_on_cpu
+
+    @property
+    def replica_id(self):
+        return self._replica_id
+
+    @property
+    def num_replicas(self):
+        return self._num_replicas
+
+    @property
+    def num_ps_tasks(self):
+        return self._num_ps_tasks
+
+    @property
+    def ps_device(self):
+        return self._ps_device
+
+    @property
+    def worker_device(self):
+        return self._worker_device
+
+    def caching_device(self):
+        """Returns the device to use for caching variables.
