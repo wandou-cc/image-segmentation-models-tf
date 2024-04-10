@@ -139,3 +139,131 @@ def create_clones(config, model_fn, args=None, kwargs=None):
       `Clone(outputs, scope, device)`
 
       Note: it is assumed that any loss created by `model_fn` is collected at
+      the tf.GraphKeys.LOSSES collection.
+
+      To recover the losses, summaries or update_ops created by the clone use:
+      ```python
+        losses = tf.get_collection(tf.GraphKeys.LOSSES, clone.scope)
+        summaries = tf.get_collection(tf.GraphKeys.SUMMARIES, clone.scope)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, clone.scope)
+      ```
+
+      The deployment options are specified by the config object and support
+      deploying one or several clones on different GPUs and one or several replicas
+      of such clones.
+
+      The argument `model_fn` is called `config.num_clones` times to create the
+      model clones as `model_fn(*args, **kwargs)`.
+
+      If `config` specifies deployment on multiple replicas then the default
+      tensorflow device is set appropriatly for each call to `model_fn` and for the
+      slim variable creation functions: model and global variables will be created
+      on the `ps` device, the clone operations will be on the `worker` device.
+
+      Args:
+        config: A DeploymentConfig object.
+        model_fn: A callable. Called as `model_fn(*args, **kwargs)`
+        args: Optional list of arguments to pass to `model_fn`.
+        kwargs: Optional list of keyword arguments to pass to `model_fn`.
+
+      Returns:
+        A list of namedtuples `Clone`.
+      """
+    clones = []
+    args = args or []
+    kwargs = kwargs or {}
+    with slim.arg_scope(
+        [slim.model_variable, slim.variable], device=config.variables_device()):
+        # Create clones.
+        for i in range(0, config.num_clones):
+            with tf.name_scope(config.clone_scope(i)) as clone_scope:
+                clone_device = config.clone_device(i)
+                with tf.device(clone_device):
+                    with tf.variable_scope(
+                            tf.get_variable_scope(), reuse=True if i > 0 else
+                            None):
+                        outputs = model_fn(*args, **kwargs)
+                    clones.append(Clone(outputs, clone_scope, clone_device))
+    return clones
+
+
+def _gather_clone_loss(clone, num_clones, regularization_losses):
+    """Gather the loss for a single clone.
+
+      Args:
+        clone: A Clone namedtuple.
+        num_clones: The number of clones being deployed.
+        regularization_losses: Possibly empty list of regularization_losses
+          to add to the clone losses.
+
+      Returns:
+        A tensor for the total loss for the clone.  Can be None.
+      """
+    # The return value.
+    sum_loss = None
+    # Individual components of the loss that will need summaries.
+    clone_loss = None
+    regularization_loss = None
+    # Compute and aggregate losses on the clone device.
+    with tf.device(clone.device):
+        all_losses = []
+        clone_losses = tf.get_collection(tf.GraphKeys.LOSSES, clone.scope)
+        if clone_losses:
+            clone_loss = tf.add_n(clone_losses, name='clone_loss')
+            if num_clones > 1:
+                clone_loss = tf.div(clone_loss,
+                                    1.0 * num_clones,
+                                    name='scaled_clone_loss')
+            all_losses.append(clone_loss)
+        if regularization_losses:
+            regularization_loss = tf.add_n(
+                regularization_losses, name='regularization_loss')
+            all_losses.append(regularization_loss)
+        if all_losses:
+            sum_loss = tf.add_n(all_losses)
+    # Add the summaries out of the clone device block.
+    if clone_loss is not None:
+        tf.summary.scalar(clone.scope + '/clone_loss', clone_loss)
+    if regularization_loss is not None:
+        tf.summary.scalar('regularization_loss', regularization_loss)
+    return sum_loss
+
+
+def _optimize_clone(optimizer, clone, num_clones, regularization_losses,
+                    **kwargs):
+    """Compute losses and gradients for a single clone.
+
+      Args:
+        optimizer: A tf.Optimizer  object.
+        clone: A Clone namedtuple.
+        num_clones: The number of clones being deployed.
+        regularization_losses: Possibly empty list of regularization_losses
+          to add to the clone losses.
+        **kwargs: Dict of kwarg to pass to compute_gradients().
+
+      Returns:
+        A tuple (clone_loss, clone_grads_and_vars).
+          - clone_loss: A tensor for the total loss for the clone.  Can be None.
+          - clone_grads_and_vars: List of (gradient, variable) for the clone.
+            Can be empty.
+      """
+    sum_loss = _gather_clone_loss(clone, num_clones, regularization_losses)
+    clone_grad = None
+    if sum_loss is not None:
+        with tf.device(clone.device):
+            clone_grad = optimizer.compute_gradients(sum_loss, **kwargs)
+    return sum_loss, clone_grad
+
+
+def optimize_clones(clones, optimizer, regularization_losses=None, **kwargs):
+    """Compute clone losses and gradients for the given list of `Clones`.
+
+      Note: The regularization_losses are added to the first clone losses.
+
+      Args:
+       clones: List of `Clones` created by `create_clones()`.
+       optimizer: An `Optimizer` object.
+       regularization_losses: Optional list of regularization losses. If None it
+         will gather them from tf.GraphKeys.REGULARIZATION_LOSSES. Pass `[]` to
+         exclude them.
+       **kwargs: Optional list of keyword arguments to pass to `compute_gradients`.
