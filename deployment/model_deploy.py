@@ -560,3 +560,116 @@ class DeploymentConfig(object):
 
     def caching_device(self):
         """Returns the device to use for caching variables.
+
+            Variables are cached on the worker CPU when using replicas.
+
+            Returns:
+              A device string or None if the variables do not need to be cached.
+            """
+        if self._num_ps_tasks > 0:
+            return lambda op: op.device
+        else:
+            return None
+
+    def clone_device(self, clone_index):
+        """Device used to create the clone and all the ops inside the clone.
+
+            Args:
+              clone_index: Int, representing the clone_index.
+
+            Returns:
+              A value suitable for `tf.device()`.
+
+            Raises:
+              ValueError: if `clone_index` is greater or equal to the number of clones".
+            """
+        if clone_index >= self._num_clones:
+            raise ValueError('clone_index must be less than num_clones')
+        device = ''
+        if self._num_ps_tasks > 0:
+            device += self._worker_device
+        if self._clone_on_cpu:
+            device += '/device:CPU:0'
+        else:
+            if self._num_clones > 1:
+                device += '/device:GPU:%d' % clone_index
+        return device
+
+    def clone_scope(self, clone_index):
+        """Name scope to create the clone.
+
+            Args:
+              clone_index: Int, representing the clone_index.
+
+            Returns:
+              A name_scope suitable for `tf.name_scope()`.
+
+            Raises:
+              ValueError: if `clone_index` is greater or equal to the number of clones".
+            """
+        if clone_index >= self._num_clones:
+            raise ValueError('clone_index must be less than num_clones')
+        scope = ''
+        if self._num_clones > 1:
+            scope = 'clone_%d' % clone_index
+        return scope
+
+    def optimizer_device(self):
+        """Device to use with the optimizer.
+
+            Returns:
+              A value suitable for `tf.device()`.
+            """
+        if self._num_ps_tasks > 0 or self._num_clones > 0:
+            return self._worker_device + '/device:CPU:0'
+        else:
+            return ''
+
+    def inputs_device(self):
+        """Device to use to build the inputs.
+
+            Returns:
+              A value suitable for `tf.device()`.
+            """
+        device = ''
+        if self._num_ps_tasks > 0:
+            device += self._worker_device
+        device += '/device:CPU:0'
+        return device
+
+    def variables_device(self):
+        """Returns the device to use for variables created inside the clone.
+
+            Returns:
+              A value suitable for `tf.device()`.
+            """
+        device = ''
+        if self._num_ps_tasks > 0:
+            device += self._ps_device
+        device += '/device:CPU:0'
+
+        class _PSDeviceChooser(object):
+            """Slim device chooser for variables when using PS."""
+
+            def __init__(self, device, tasks):
+                self._device = device
+                self._tasks = tasks
+                self._task = 0
+
+            def choose(self, op):
+                if op.device:
+                    return op.device
+                node_def = op if isinstance(op, tf.NodeDef) else op.node_def
+                if node_def.op == 'Variable':
+                    t = self._task
+                    self._task = (self._task + 1) % self._tasks
+                    d = '%s/task:%d' % (self._device, t)
+                    return d
+                else:
+                    return op.device
+
+        if not self._num_ps_tasks:
+            return device
+        else:
+            chooser = _PSDeviceChooser(device, self._num_ps_tasks)
+            return chooser.choose
