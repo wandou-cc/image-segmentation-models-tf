@@ -149,3 +149,134 @@ def BatchNormClassifier(inputs, labels, scope=None, reuse=None):
             inputs, 1, activation_fn=tf.sigmoid, scope='fully_connected')
         slim.losses.log_loss(predictions, labels)
         return predictions
+
+
+class CreatecloneTest(tf.test.TestCase):
+
+    def setUp(self):
+        # Create an easy training set:
+        np.random.seed(0)
+
+        self._inputs = np.zeros((16, 4))
+        self._labels = np.random.randint(0, 2, size=(16, 1)).astype(np.float32)
+        self._logdir = self.get_temp_dir()
+
+        for i in range(16):
+            j = int(2 * self._labels[i] + np.random.randint(0, 2))
+            self._inputs[i, j] = 1
+
+    def testCreateLogisticClassifier(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = LogisticClassifier
+            clone_args = (tf_inputs, tf_labels)
+            deploy_config = model_deploy.DeploymentConfig(num_clones=1)
+
+            self.assertEqual(slim.get_variables(), [])
+            clones = model_deploy.create_clones(
+                deploy_config, model_fn, clone_args)
+            clone = clones[0]
+            self.assertEqual(len(slim.get_variables()), 2)
+            for v in slim.get_variables():
+                self.assertDeviceEqual(v.device, 'CPU:0')
+                self.assertDeviceEqual(v.value().device, 'CPU:0')
+            self.assertEqual(clone.outputs.op.name,
+                             'LogisticClassifier/fully_connected/Sigmoid')
+            self.assertEqual(clone.scope, '')
+            self.assertDeviceEqual(clone.device, '')
+            self.assertEqual(len(slim.losses.get_losses()), 1)
+            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            self.assertEqual(update_ops, [])
+
+    def testCreateSingleclone(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = BatchNormClassifier
+            clone_args = (tf_inputs, tf_labels)
+            deploy_config = model_deploy.DeploymentConfig(num_clones=1)
+
+            self.assertEqual(slim.get_variables(), [])
+            clones = model_deploy.create_clones(
+                deploy_config, model_fn, clone_args)
+            clone = clones[0]
+            self.assertEqual(len(slim.get_variables()), 5)
+            for v in slim.get_variables():
+                self.assertDeviceEqual(v.device, 'CPU:0')
+                self.assertDeviceEqual(v.value().device, 'CPU:0')
+            self.assertEqual(clone.outputs.op.name,
+                             'BatchNormClassifier/fully_connected/Sigmoid')
+            self.assertEqual(clone.scope, '')
+            self.assertDeviceEqual(clone.device, '')
+            self.assertEqual(len(slim.losses.get_losses()), 1)
+            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            self.assertEqual(len(update_ops), 2)
+
+    def testCreateMulticlone(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = BatchNormClassifier
+            clone_args = (tf_inputs, tf_labels)
+            num_clones = 4
+            deploy_config = model_deploy.DeploymentConfig(
+                num_clones=num_clones)
+
+            self.assertEqual(slim.get_variables(), [])
+            clones = model_deploy.create_clones(
+                deploy_config, model_fn, clone_args)
+            self.assertEqual(len(slim.get_variables()), 5)
+            for v in slim.get_variables():
+                self.assertDeviceEqual(v.device, 'CPU:0')
+                self.assertDeviceEqual(v.value().device, 'CPU:0')
+            self.assertEqual(len(clones), num_clones)
+            for i, clone in enumerate(clones):
+                self.assertEqual(
+                    clone.outputs.op.name,
+                    'clone_%d/BatchNormClassifier/fully_connected/Sigmoid' % i)
+                update_ops = tf.get_collection(
+                    tf.GraphKeys.UPDATE_OPS, clone.scope)
+                self.assertEqual(len(update_ops), 2)
+                self.assertEqual(clone.scope, 'clone_%d/' % i)
+                self.assertDeviceEqual(clone.device, 'GPU:%d' % i)
+
+    def testCreateOnecloneWithPS(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = BatchNormClassifier
+            clone_args = (tf_inputs, tf_labels)
+            deploy_config = model_deploy.DeploymentConfig(
+                num_clones=1, num_ps_tasks=1)
+
+            self.assertEqual(slim.get_variables(), [])
+            clones = model_deploy.create_clones(
+                deploy_config, model_fn, clone_args)
+            self.assertEqual(len(clones), 1)
+            clone = clones[0]
+            self.assertEqual(clone.outputs.op.name,
+                             'BatchNormClassifier/fully_connected/Sigmoid')
+            self.assertDeviceEqual(clone.device, '/job:worker')
+            self.assertEqual(clone.scope, '')
+            self.assertEqual(len(slim.get_variables()), 5)
+            for v in slim.get_variables():
+                self.assertDeviceEqual(v.device, '/job:ps/task:0/CPU:0')
+                self.assertDeviceEqual(v.device, v.value().device)
+
+    def testCreateMulticloneWithPS(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
