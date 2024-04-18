@@ -280,3 +280,138 @@ class CreatecloneTest(tf.test.TestCase):
         g = tf.Graph()
         with g.as_default():
             tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = BatchNormClassifier
+            clone_args = (tf_inputs, tf_labels)
+            deploy_config = model_deploy.DeploymentConfig(
+                num_clones=2, num_ps_tasks=2)
+
+            self.assertEqual(slim.get_variables(), [])
+            clones = model_deploy.create_clones(
+                deploy_config, model_fn, clone_args)
+            self.assertEqual(len(slim.get_variables()), 5)
+            for i, v in enumerate(slim.get_variables()):
+                t = i % 2
+                self.assertDeviceEqual(
+                    v.device, '/job:ps/task:%d/device:CPU:0' % t)
+                self.assertDeviceEqual(v.device, v.value().device)
+            self.assertEqual(len(clones), 2)
+            for i, clone in enumerate(clones):
+                self.assertEqual(
+                    clone.outputs.op.name,
+                    'clone_%d/BatchNormClassifier/fully_connected/Sigmoid' % i)
+                self.assertEqual(clone.scope, 'clone_%d/' % i)
+                self.assertDeviceEqual(
+                    clone.device, '/job:worker/device:GPU:%d' % i)
+
+
+class OptimizeclonesTest(tf.test.TestCase):
+
+    def setUp(self):
+        # Create an easy training set:
+        np.random.seed(0)
+
+        self._inputs = np.zeros((16, 4))
+        self._labels = np.random.randint(0, 2, size=(16, 1)).astype(np.float32)
+        self._logdir = self.get_temp_dir()
+
+        for i in range(16):
+            j = int(2 * self._labels[i] + np.random.randint(0, 2))
+            self._inputs[i, j] = 1
+
+    def testCreateLogisticClassifier(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = LogisticClassifier
+            clone_args = (tf_inputs, tf_labels)
+            deploy_config = model_deploy.DeploymentConfig(num_clones=1)
+
+            self.assertEqual(slim.get_variables(), [])
+            clones = model_deploy.create_clones(
+                deploy_config, model_fn, clone_args)
+            self.assertEqual(len(slim.get_variables()), 2)
+            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            self.assertEqual(update_ops, [])
+
+            optimizer = tf.train.GradientDescentOptimizer(learning_rate=1.0)
+            total_loss, grads_and_vars = model_deploy.optimize_clones(clones,
+                                                                      optimizer)
+            self.assertEqual(len(grads_and_vars),
+                             len(tf.trainable_variables()))
+            self.assertEqual(total_loss.op.name, 'total_loss')
+            for g, v in grads_and_vars:
+                self.assertDeviceEqual(g.device, '')
+                self.assertDeviceEqual(v.device, 'CPU:0')
+
+    def testCreateSingleclone(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = BatchNormClassifier
+            clone_args = (tf_inputs, tf_labels)
+            deploy_config = model_deploy.DeploymentConfig(num_clones=1)
+
+            self.assertEqual(slim.get_variables(), [])
+            clones = model_deploy.create_clones(
+                deploy_config, model_fn, clone_args)
+            self.assertEqual(len(slim.get_variables()), 5)
+            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            self.assertEqual(len(update_ops), 2)
+
+            optimizer = tf.train.GradientDescentOptimizer(learning_rate=1.0)
+            total_loss, grads_and_vars = model_deploy.optimize_clones(clones,
+                                                                      optimizer)
+            self.assertEqual(len(grads_and_vars),
+                             len(tf.trainable_variables()))
+            self.assertEqual(total_loss.op.name, 'total_loss')
+            for g, v in grads_and_vars:
+                self.assertDeviceEqual(g.device, '')
+                self.assertDeviceEqual(v.device, 'CPU:0')
+
+    def testCreateMulticlone(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = BatchNormClassifier
+            clone_args = (tf_inputs, tf_labels)
+            num_clones = 4
+            deploy_config = model_deploy.DeploymentConfig(
+                num_clones=num_clones)
+
+            self.assertEqual(slim.get_variables(), [])
+            clones = model_deploy.create_clones(
+                deploy_config, model_fn, clone_args)
+            self.assertEqual(len(slim.get_variables()), 5)
+            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            self.assertEqual(len(update_ops), num_clones * 2)
+
+            optimizer = tf.train.GradientDescentOptimizer(learning_rate=1.0)
+            total_loss, grads_and_vars = model_deploy.optimize_clones(clones,
+                                                                      optimizer)
+            self.assertEqual(len(grads_and_vars),
+                             len(tf.trainable_variables()))
+            self.assertEqual(total_loss.op.name, 'total_loss')
+            for g, v in grads_and_vars:
+                self.assertDeviceEqual(g.device, '')
+                self.assertDeviceEqual(v.device, 'CPU:0')
+
+    def testCreateMulticloneCPU(self):
+        g = tf.Graph()
+        with g.as_default():
+            tf.set_random_seed(0)
+            tf_inputs = tf.constant(self._inputs, dtype=tf.float32)
+            tf_labels = tf.constant(self._labels, dtype=tf.float32)
+
+            model_fn = BatchNormClassifier
