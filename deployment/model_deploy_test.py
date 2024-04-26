@@ -556,3 +556,20 @@ class DeployTest(tf.test.TestCase):
 
             # clone function creates a fully_connected layer with a regularizer
             # loss.
+            def ModelFn():
+                inputs = tf.constant(1.0, shape=(10, 20), dtype=tf.float32)
+                reg = tf.contrib.layers.l2_regularizer(0.001)
+                tf.contrib.layers.fully_connected(
+                    inputs, 30, weights_regularizer=reg)
+
+            # No optimizer here, it's an eval.
+            model = model_deploy.deploy(deploy_config, ModelFn)
+            # The model summary op should have a few summary inputs and all of them
+            # should be on the CPU.
+            self.assertTrue(model.summary_op.op.inputs)
+            for inp in model.summary_op.op.inputs:
+                self.assertEqual('/device:CPU:0', inp.device)
+
+
+if __name__ == '__main__':
+    tf.test.main()
