@@ -9,4 +9,8 @@ import tensorflow as tf
 slim = tf.contrib.slim
 
 
-def fcn_arg_scope(weight_decay=0.0005
+def fcn_arg_scope(weight_decay=0.0005):
+  with slim.arg_scope(
+      [slim.conv2d, slim.fully_connected, slim.conv2d_transpose],
+      activation_fn=tf.nn.relu,
+      weights_regularizer=slim.l
