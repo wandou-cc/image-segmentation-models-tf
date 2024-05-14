@@ -15,4 +15,12 @@ def fcn_arg_scope(weight_decay=0.0005):
       activation_fn=tf.nn.relu,
       weights_regularizer=slim.l2_regularizer(weight_decay),
       biases_initializer=tf.zeros_initializer):
-    with slim.arg_scope([slim.conv2d], padding='SAME') as arg_
+    with slim.arg_scope([slim.conv2d], padding='SAME') as arg_sc:
+      return arg_sc
+
+
+def fcn_32(inputs,
+           num_classes=21,
+           is_training=True,
+           dropout_prob=0.5,
+           scop
