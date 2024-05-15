@@ -23,4 +23,7 @@ def fcn_32(inputs,
            num_classes=21,
            is_training=True,
            dropout_prob=0.5,
-           scop
+           scope='fcn_32'):
+  with tf.variable_scope(scope, 'fcn_32', [inputs]) as sc:
+    end_points_collection = sc.name + '_end_points'
+    # Collect 
