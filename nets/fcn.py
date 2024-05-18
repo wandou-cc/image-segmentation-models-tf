@@ -26,4 +26,7 @@ def fcn_32(inputs,
            scope='fcn_32'):
   with tf.variable_scope(scope, 'fcn_32', [inputs]) as sc:
     end_points_collection = sc.name + '_end_points'
-    # Collect 
+    # Collect outputs for conv2d, fully_connected, conv2d_transpose and max_pool2d.
+    with slim.arg_scope(
+        [
+            slim.conv2d, slim
