@@ -29,4 +29,9 @@ def fcn_32(inputs,
     # Collect outputs for conv2d, fully_connected, conv2d_transpose and max_pool2d.
     with slim.arg_scope(
         [
-            slim.conv2d, slim
+            slim.conv2d, slim.fully_connected, slim.max_pool2d,
+            slim.conv2d_transpose
+        ],
+        outputs_collections=end_points_collection):
+
+      #
