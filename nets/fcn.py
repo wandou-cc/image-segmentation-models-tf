@@ -35,4 +35,7 @@ def fcn_32(inputs,
         outputs_collections=end_points_collection):
 
       # Contracting portion is VGG-16 https://goo.gl/dM7PWe 
-      net = slim.repeat(inputs, 2, slim.conv2d, 64, [3, 3], scope='conv1'
+      net = slim.repeat(inputs, 2, slim.conv2d, 64, [3, 3], scope='conv1')
+      pool1 = slim.max_pool2d(net, [2, 2], scope='pool1')
+      net = slim.repeat(pool1, 2, slim.conv2d, 128, [3, 3], scope='conv2')
+      pool2 = slim.m
