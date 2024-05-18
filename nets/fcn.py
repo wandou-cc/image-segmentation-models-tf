@@ -34,4 +34,5 @@ def fcn_32(inputs,
         ],
         outputs_collections=end_points_collection):
 
-      #
+      # Contracting portion is VGG-16 https://goo.gl/dM7PWe 
+      net = slim.repeat(inputs, 2, slim.conv2d, 64, [3, 3], scope='conv1'
