@@ -43,4 +43,6 @@ def fcn_32(inputs,
       pool3 = slim.max_pool2d(net, [2, 2], scope='pool3')
       net = slim.repeat(pool3, 3, slim.conv2d, 512, [3, 3], scope='conv4')
       pool4 = slim.max_pool2d(net, [2, 2], scope='pool4')
-      net = slim.repeat(pool4
+      net = slim.repeat(pool4, 3, slim.conv2d, 512, [3, 3], scope='conv5')
+      pool5 = slim.max_pool2d(net, [2, 2], scope='pool5')
+      # Fully connected layers (in reference b
