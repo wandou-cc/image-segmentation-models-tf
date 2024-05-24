@@ -40,4 +40,7 @@ def fcn_32(inputs,
       net = slim.repeat(pool1, 2, slim.conv2d, 128, [3, 3], scope='conv2')
       pool2 = slim.max_pool2d(net, [2, 2], scope='pool2')
       net = slim.repeat(pool2, 3, slim.conv2d, 256, [3, 3], scope='conv3')
-      pool3 = slim.max_pool2d(net, [2, 2], scop
+      pool3 = slim.max_pool2d(net, [2, 2], scope='pool3')
+      net = slim.repeat(pool3, 3, slim.conv2d, 512, [3, 3], scope='conv4')
+      pool4 = slim.max_pool2d(net, [2, 2], scope='pool4')
+      net = slim.repeat(pool4
