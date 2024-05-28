@@ -48,4 +48,7 @@ def fcn_32(inputs,
       # Fully connected layers (in reference but not really sure if we need)
       net = slim.fully_connected(pool5, 4096, scope='fc6')
       net = slim.dropout(
-          net, dropout_prob, is_training=is_tra
+          net, dropout_prob, is_training=is_training, scope='drop6')
+      net = slim.fully_connected(net, 4096, scope='fc7')
+      net = slim.dropout(
+          net, dropout_prob
