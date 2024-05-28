@@ -45,4 +45,7 @@ def fcn_32(inputs,
       pool4 = slim.max_pool2d(net, [2, 2], scope='pool4')
       net = slim.repeat(pool4, 3, slim.conv2d, 512, [3, 3], scope='conv5')
       pool5 = slim.max_pool2d(net, [2, 2], scope='pool5')
-      # Fully connected layers (in reference b
+      # Fully connected layers (in reference but not really sure if we need)
+      net = slim.fully_connected(pool5, 4096, scope='fc6')
+      net = slim.dropout(
+          net, dropout_prob, is_training=is_tra
