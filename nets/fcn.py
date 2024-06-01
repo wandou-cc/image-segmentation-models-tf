@@ -51,4 +51,7 @@ def fcn_32(inputs,
           net, dropout_prob, is_training=is_training, scope='drop6')
       net = slim.fully_connected(net, 4096, scope='fc7')
       net = slim.dropout(
-          net, dropout_prob
+          net, dropout_prob, is_training=is_training, scope='drop7')
+      net = slim.fully_connected(net, num_classes, scope='fc8')
+
+      # Expanding : Upscore : https
