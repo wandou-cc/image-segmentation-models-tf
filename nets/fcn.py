@@ -57,4 +57,6 @@ def fcn_32(inputs,
       # Expanding : Upscore : https://goo.gl/wchbCq
 
       # n.score_fr = L.Convolution(n.drop7, num_output=21, kernel_size=1, pad=0,
-      #     param=[dict(lr_mult=1
+      #     param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
+      # n.upscore = L.Deconvolution(n.score_fr,
+      #     convolution_param=dict(num_output=21, ke
