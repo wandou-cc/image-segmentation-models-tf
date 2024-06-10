@@ -59,4 +59,8 @@ def fcn_32(inputs,
       # n.score_fr = L.Convolution(n.drop7, num_output=21, kernel_size=1, pad=0,
       #     param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
       # n.upscore = L.Deconvolution(n.score_fr,
-      #     convolution_param=dict(num_output=21, ke
+      #     convolution_param=dict(num_output=21, kernel_size=64, stride=32,
+      #         bias_term=False),
+      #     param=[dict(lr_mult=0)])
+      # n.score = crop(n.upscore, n.data)
+      net = slim.conv2d_tran
