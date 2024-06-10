@@ -54,4 +54,7 @@ def fcn_32(inputs,
           net, dropout_prob, is_training=is_training, scope='drop7')
       net = slim.fully_connected(net, num_classes, scope='fc8')
 
-      # Expanding : Upscore : https
+      # Expanding : Upscore : https://goo.gl/wchbCq
+
+      # n.score_fr = L.Convolution(n.drop7, num_output=21, kernel_size=1, pad=0,
+      #     param=[dict(lr_mult=1
