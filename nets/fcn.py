@@ -66,4 +66,6 @@ def fcn_32(inputs,
       net = slim.conv2d_transpose(
           net, 64, [2, 2], stride=32, padding='VALID', scope='up1')
 
-      net = slim.conv2d(net, num_classes, [1, 1], scope='scor
+      net = slim.conv2d(net, num_classes, [1, 1], scope='score')
+      net = tf.argmax(net, dimension=3, name="prediction")
+      end_points = slim.utils.convert_collection_to_dict(end_point
