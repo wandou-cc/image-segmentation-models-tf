@@ -63,4 +63,7 @@ def fcn_32(inputs,
       #         bias_term=False),
       #     param=[dict(lr_mult=0)])
       # n.score = crop(n.upscore, n.data)
-      net = slim.conv2d_tran
+      net = slim.conv2d_transpose(
+          net, 64, [2, 2], stride=32, padding='VALID', scope='up1')
+
+      net = slim.conv2d(net, num_classes, [1, 1], scope='scor
