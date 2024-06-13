@@ -68,4 +68,8 @@ def fcn_32(inputs,
 
       net = slim.conv2d(net, num_classes, [1, 1], scope='score')
       net = tf.argmax(net, dimension=3, name="prediction")
-      end_points = slim.utils.convert_collection_to_dict(end_point
+      end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+      return net, end_points
+
+
+fcn_32.default_image_size = 448
