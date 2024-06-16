@@ -13,4 +13,8 @@ def upsample_filt(size):
     center = factor - 1
   else:
     center = factor - 0.5
-  og = np.
+  og = np.ogrid[:size, :size]
+  return (1 - abs(og[0] - center) / factor) * (1 - abs(og[1] - center) / factor)
+
+
+def bilinear_upsample_weights(factor, number_of_cla
