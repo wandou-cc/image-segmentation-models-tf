@@ -7,4 +7,10 @@ def get_kernel_size(factor):
 
 
 def upsample_filt(size):
-  """Make a 2D bilinear kernel suitable for upsa
+  """Make a 2D bilinear kernel suitable for upsampling of the given (h, w) size."""
+  factor = (size + 1) // 2
+  if size % 2 == 1:
+    center = factor - 1
+  else:
+    center = factor - 0.5
+  og = np.
