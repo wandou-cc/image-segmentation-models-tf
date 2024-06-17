@@ -17,4 +17,7 @@ def upsample_filt(size):
   return (1 - abs(og[0] - center) / factor) * (1 - abs(og[1] - center) / factor)
 
 
-def bilinear_upsample_weights(factor, number_of_cla
+def bilinear_upsample_weights(factor, number_of_classes):
+  """Create weights matrix for transposed convolution with bilinear filter initialization."""
+
+  filter_size = get_kernel_size(factor
