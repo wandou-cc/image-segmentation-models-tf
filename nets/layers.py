@@ -20,4 +20,10 @@ def upsample_filt(size):
 def bilinear_upsample_weights(factor, number_of_classes):
   """Create weights matrix for transposed convolution with bilinear filter initialization."""
 
-  filter_size = get_kernel_size(factor
+  filter_size = get_kernel_size(factor)
+
+  weights = np.zeros(
+      (filter_size, filter_size, number_of_classes, number_of_classes),
+      dtype=np.float32)
+
+  upsample_kernel = upsamp
