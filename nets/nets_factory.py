@@ -15,4 +15,9 @@ networks_map = {
     'fcn_32':
         fcn.fcn_32,
     # included in slim contrib
-    # 'alexnet_v2': alexnet.ale
+    # 'alexnet_v2': alexnet.alexnet_v2,
+    # 'overfeat': overfeat.overfeat,
+    # 'vgg_a': vgg.vgg_a,
+    # 'vgg_16': vgg.vgg_16,
+    # 'vgg_19': vgg.vgg_19,
+    # 'incepti
