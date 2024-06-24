@@ -20,4 +20,7 @@ networks_map = {
     # 'vgg_a': vgg.vgg_a,
     # 'vgg_16': vgg.vgg_16,
     # 'vgg_19': vgg.vgg_19,
-    # 'incepti
+    # 'inception_v1': inception.inception_v1,
+    # 'inception_v2': inception.inception_v2,
+    # 'inception_v3': inception.inception_v3,
+    # 'resnet_v1_50': r
