@@ -23,4 +23,7 @@ networks_map = {
     # 'inception_v1': inception.inception_v1,
     # 'inception_v2': inception.inception_v2,
     # 'inception_v3': inception.inception_v3,
-    # 'resnet_v1_50': r
+    # 'resnet_v1_50': resnet_v1.resnet_v1_50,
+    # 'resnet_v1_101': resnet_v1.resnet_v1_101,
+    # 'resnet_v1_152': resnet_v1.resnet_v1_152,
+    # 'resnet_v1_200': resne
