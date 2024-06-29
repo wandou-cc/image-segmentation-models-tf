@@ -26,4 +26,8 @@ networks_map = {
     # 'resnet_v1_50': resnet_v1.resnet_v1_50,
     # 'resnet_v1_101': resnet_v1.resnet_v1_101,
     # 'resnet_v1_152': resnet_v1.resnet_v1_152,
-    # 'resnet_v1_200': resne
+    # 'resnet_v1_200': resnet_v1.resnet_v1_200,
+    # 'resnet_v2_50': resnet_v2.resnet_v2_50,
+    # 'resnet_v2_101': resnet_v2.resnet_v2_101,
+    # 'resnet_v2_152': resnet_v2.resnet_v2_152,
+    #
