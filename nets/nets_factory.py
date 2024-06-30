@@ -30,4 +30,11 @@ networks_map = {
     # 'resnet_v2_50': resnet_v2.resnet_v2_50,
     # 'resnet_v2_101': resnet_v2.resnet_v2_101,
     # 'resnet_v2_152': resnet_v2.resnet_v2_152,
-    #
+    # 'resnet_v2_200': resnet_v2.resnet_v2_200,
+}
+
+arg_scopes_map = {
+    # custom
+    'fcn_32':
+        fcn.fcn_arg_scope,
+    # included 
