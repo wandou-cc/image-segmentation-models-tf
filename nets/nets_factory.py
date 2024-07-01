@@ -41,4 +41,7 @@ arg_scopes_map = {
     # 'alexnet_v2': alexnet.alexnet_v2_arg_scope,
     # 'overfeat': overfeat.overfeat_arg_scope,
     # 'vgg_a': vgg.vgg_arg_scope,
-    # 'vgg_16': vgg.vgg_
+    # 'vgg_16': vgg.vgg_arg_scope,
+    # 'vgg_19': vgg.vgg_arg_scope,
+    # 'inception_v1': inception.inception_v3_arg_scope,
+    # 'inception_v2': incep
