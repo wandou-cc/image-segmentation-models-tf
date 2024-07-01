@@ -37,4 +37,8 @@ arg_scopes_map = {
     # custom
     'fcn_32':
         fcn.fcn_arg_scope,
-    # included 
+    # included in slim contrib
+    # 'alexnet_v2': alexnet.alexnet_v2_arg_scope,
+    # 'overfeat': overfeat.overfeat_arg_scope,
+    # 'vgg_a': vgg.vgg_arg_scope,
+    # 'vgg_16': vgg.vgg_
