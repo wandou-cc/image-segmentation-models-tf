@@ -47,4 +47,7 @@ arg_scopes_map = {
     # 'inception_v2': inception.inception_v3_arg_scope,
     # 'inception_v3': inception.inception_v3_arg_scope,
     # 'resnet_v1_50': resnet_v1.resnet_arg_scope,
-    # 'resnet_v
+    # 'resnet_v1_101': resnet_v1.resnet_arg_scope,
+    # 'resnet_v1_152': resnet_v1.resnet_arg_scope,
+    # 'resnet_v1_200': resnet_v1.resnet_arg_scope,
+    # 'resnet_v2_5
