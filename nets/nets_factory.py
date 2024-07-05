@@ -50,4 +50,7 @@ arg_scopes_map = {
     # 'resnet_v1_101': resnet_v1.resnet_arg_scope,
     # 'resnet_v1_152': resnet_v1.resnet_arg_scope,
     # 'resnet_v1_200': resnet_v1.resnet_arg_scope,
-    # 'resnet_v2_5
+    # 'resnet_v2_50': resnet_v2.resnet_arg_scope,
+    # 'resnet_v2_101': resnet_v2.resnet_arg_scope,
+    # 'resnet_v2_152': resnet_v2.resnet_arg_scope,
+    # '
