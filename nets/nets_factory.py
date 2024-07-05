@@ -58,4 +58,8 @@ arg_scopes_map = {
 
 
 def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
-  """Retur
+  """Returns a network_fn such as `logits, end_points = network_fn(images)`.
+
+    Args:
+      name: The name of the network.
+      num_classes: The number of 
