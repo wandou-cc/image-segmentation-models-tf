@@ -64,4 +64,9 @@ def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
       name: The name of the network.
       num_classes: The number of classes to use for classification.
       weight_decay: The l2 coefficient for the model weights.
-      is_training: `True` if the model is b
+      is_training: `True` if the model is being used for training and `False`
+        otherwise.
+
+    Returns:
+      network_fn: A function that applies the model to a batch of images. It has
+  
