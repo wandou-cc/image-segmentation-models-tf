@@ -77,4 +77,9 @@ def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
   if name not in networks_map:
     raise ValueError('Name of network unknown %s' % name)
   arg_scope = arg_scopes_map[name](weight_decay=weight_decay)
-  func = n
+  func = networks_map[name]
+
+  @functools.wraps(func)
+  def network_fn(images):
+    with slim.arg_scope(arg_scope):
+      return func(images, num_classes, is_tr
