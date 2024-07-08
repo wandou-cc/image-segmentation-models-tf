@@ -69,4 +69,9 @@ def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
 
     Returns:
       network_fn: A function that applies the model to a batch of images. It has
-  
+        the following signature:
+          logits, end_points = network_fn(images)
+    Raises:
+      ValueError: If network `name` is not recognized.
+    """
+  if name
