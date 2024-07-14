@@ -20,4 +20,9 @@ def _mean_image_subtraction(image, means):
     raise ValueError('len(means) must match the number of channels')
 
   channels = tf.split(2, num_channels, image)
-  for 
+  for i in range(num_channels):
+    channels[i] -= means[i]
+  return tf.concat(2, channels)
+
+
+def preprocess_image(image, label, output_heigh
