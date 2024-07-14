@@ -16,4 +16,8 @@ def _mean_image_subtraction(image, means):
   if image.get_shape().ndims != 3:
     raise ValueError('Input must be of size [height, width, C>0]')
   num_channels = image.get_shape().as_list()[-1]
-  if len(means) != num_channels
+  if len(means) != num_channels:
+    raise ValueError('len(means) must match the number of channels')
+
+  channels = tf.split(2, num_channels, image)
+  for 
