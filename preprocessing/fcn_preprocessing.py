@@ -30,4 +30,6 @@ def preprocess_image(image, label, output_height, output_width, is_training):
   if image.dtype != tf.float32:
     image = tf.image.convert_image_dtype(image, dtype=tf.float32)
   image = tf.image.resize_image_with_crop_or_pad(image, output_width,
-                          
+                                                 output_height)
+  label = tf.image.resize_image_with_crop_or_pad(label, output_width,
+                                     
