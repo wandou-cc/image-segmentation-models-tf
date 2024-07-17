@@ -28,4 +28,6 @@ def _mean_image_subtraction(image, means):
 def preprocess_image(image, label, output_height, output_width, is_training):
   label = tf.image.rgb_to_grayscale(label)
   if image.dtype != tf.float32:
-    image = tf.image.convert_image_
+    image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+  image = tf.image.resize_image_with_crop_or_pad(image, output_width,
+                          
