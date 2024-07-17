@@ -25,4 +25,7 @@ def _mean_image_subtraction(image, means):
   return tf.concat(2, channels)
 
 
-def preprocess_image(image, label, output_heigh
+def preprocess_image(image, label, output_height, output_width, is_training):
+  label = tf.image.rgb_to_grayscale(label)
+  if image.dtype != tf.float32:
+    image = tf.image.convert_image_
