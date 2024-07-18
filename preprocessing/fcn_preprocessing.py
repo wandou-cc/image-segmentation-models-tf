@@ -32,4 +32,6 @@ def preprocess_image(image, label, output_height, output_width, is_training):
   image = tf.image.resize_image_with_crop_or_pad(image, output_width,
                                                  output_height)
   label = tf.image.resize_image_with_crop_or_pad(label, output_width,
-                                     
+                                                 output_height)
+  image = _mean_image_subtraction(image, [_R_MEAN, _G_MEAN, _B_MEAN])
+  return image, label
