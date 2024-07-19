@@ -290,3 +290,4 @@ def preprocess_image(image,
   if is_training:
     return preprocess_for_train(image, height, width, bbox, fast_mode)
   else:
+    return preprocess_for_eval(image, height, width)
