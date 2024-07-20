@@ -95,3 +95,139 @@ def _random_crop(image_list, crop_height, crop_width):
 
       Raises:
         ValueError: if there are multiple image inputs provided with different size
+          or the images are smaller than the crop dimensions.
+      """
+  if not image_list:
+    raise ValueError('Empty image_list.')
+
+  # Compute the rank assertions.
+  rank_assertions = []
+  for i in range(len(image_list)):
+    image_rank = tf.rank(image_list[i])
+    rank_assert = tf.Assert(
+        tf.equal(image_rank, 3), [
+            'Wrong rank for tensor  %s [expected] [actual]', image_list[i].name,
+            3, image_rank
+        ])
+    rank_assertions.append(rank_assert)
+
+  image_shape = control_flow_ops.with_dependencies([rank_assertions[0]],
+                                                   tf.shape(image_list[0]))
+  image_height = image_shape[0]
+  image_width = image_shape[1]
+  crop_size_assert = tf.Assert(
+      tf.logical_and(
+          tf.greater_equal(image_height, crop_height),
+          tf.greater_equal(image_width, crop_width)),
+      ['Crop size greater than the image size.'])
+
+  asserts = [rank_assertions[0], crop_size_assert]
+
+  for i in range(1, len(image_list)):
+    image = image_list[i]
+    asserts.append(rank_assertions[i])
+    shape = control_flow_ops.with_dependencies([rank_assertions[i]],
+                                               tf.shape(image))
+    height = shape[0]
+    width = shape[1]
+
+    height_assert = tf.Assert(
+        tf.equal(height, image_height), [
+            'Wrong height for tensor %s [expected][actual]', image.name, height,
+            image_height
+        ])
+    width_assert = tf.Assert(
+        tf.equal(width, image_width), [
+            'Wrong width for tensor %s [expected][actual]', image.name, width,
+            image_width
+        ])
+    asserts.extend([height_assert, width_assert])
+
+  # Create a random bounding box.
+  #
+  # Use tf.random_uniform and not numpy.random.rand as doing the former would
+  # generate random numbers at graph eval time, unlike the latter which
+  # generates random numbers at graph definition time.
+  max_offset_height = control_flow_ops.with_dependencies(
+      asserts, tf.reshape(image_height - crop_height + 1, []))
+  max_offset_width = control_flow_ops.with_dependencies(
+      asserts, tf.reshape(image_width - crop_width + 1, []))
+  offset_height = tf.random_uniform(
+      [], maxval=max_offset_height, dtype=tf.int32)
+  offset_width = tf.random_uniform([], maxval=max_offset_width, dtype=tf.int32)
+
+  return [
+      _crop(image, offset_height, offset_width, crop_height, crop_width)
+      for image in image_list
+  ]
+
+
+def _central_crop(image_list, crop_height, crop_width):
+  """Performs central crops of the given image list.
+
+      Args:
+        image_list: a list of image tensors of the same dimension but possibly
+          varying channel.
+        crop_height: the height of the image following the crop.
+        crop_width: the width of the image following the crop.
+
+      Returns:
+        the list of cropped images.
+      """
+  outputs = []
+  for image in image_list:
+    image_height = tf.shape(image)[0]
+    image_width = tf.shape(image)[1]
+
+    offset_height = (image_height - crop_height) / 2
+    offset_width = (image_width - crop_width) / 2
+
+    outputs.append(
+        _crop(image, offset_height, offset_width, crop_height, crop_width))
+  return outputs
+
+
+def _mean_image_subtraction(image, means):
+  """Subtracts the given means from each image channel.
+
+      For example:
+        means = [123.68, 116.779, 103.939]
+        image = _mean_image_subtraction(image, means)
+
+      Note that the rank of `image` must be known.
+
+      Args:
+        image: a tensor of size [height, width, C].
+        means: a C-vector of values to subtract from each channel.
+
+      Returns:
+        the centered image.
+
+      Raises:
+        ValueError: If the rank of `image` is unknown, if `image` has a rank other
+          than three or if the number of channels in `image` doesn't match the
+          number of values in `means`.
+      """
+  if image.get_shape().ndims != 3:
+    raise ValueError('Input must be of size [height, width, C>0]')
+  num_channels = image.get_shape().as_list()[-1]
+  if len(means) != num_channels:
+    raise ValueError('len(means) must match the number of channels')
+
+  channels = tf.split(2, num_channels, image)
+  for i in range(num_channels):
+    channels[i] -= means[i]
+  return tf.concat(2, channels)
+
+
+def _smallest_size_at_least(height, width, smallest_side):
+  """Computes new shape with the smallest side equal to `smallest_side`.
+
+      Computes new shape with the smallest side equal to `smallest_side` while
+      preserving the original aspect ratio.
+
+      Args:
+        height: an int32 scalar tensor indicating the current height.
+        width: an int32 scalar tensor indicating the current width.
+        smallest_side: A python integer or scalar `Tensor` indicating the size of
+          the smallest side after resize.
