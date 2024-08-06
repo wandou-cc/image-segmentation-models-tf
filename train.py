@@ -175,3 +175,168 @@ def _configure_optimizer(learning_rate):
 def _add_variables_summaries(learning_rate):
   summaries = []
   for variable in slim.get_model_variables():
+    summaries.append(tf.summary.histogram(variable.op.name, variable))
+  summaries.append(tf.summary.scalar('training_lr', learning_rate))
+  return summaries
+
+
+def _get_init_fn():
+  """Returns a function run by the chief worker to warm-start the training.
+
+      init_fn is only run when initializing the model on first global step.
+
+      Returns:
+        An init function run by the supervisor.
+      """
+  if FLAGS.checkpoint_path is None:
+    return None
+
+  # Warn the user if a checkpoint exists in the train_dir. Then we'll be
+  # ignoring the checkpoint anyway.
+  if tf.train.latest_checkpoint(FLAGS.train_dir):
+    tf.logging.info(
+        'Ignoring --checkpoint_path because a checkpoint already exists in %s' %
+        FLAGS.train_dir)
+    return None
+
+  exclusions = []
+  if FLAGS.checkpoint_exclude_scopes:
+    exclusions = [
+        scope.strip() for scope in FLAGS.checkpoint_exclude_scopes.split(',')
+    ]
+
+  # TODO(sguada) variables.filter_variables()
+  variables_to_restore = []
+  for var in slim.get_model_variables():
+    excluded = False
+    for exclusion in exclusions:
+      if var.op.name.startswith(exclusion):
+        excluded = True
+        break
+    if not excluded:
+      variables_to_restore.append(var)
+
+  if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
+    checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
+  else:
+    checkpoint_path = FLAGS.checkpoint_path
+
+  tf.logging.info('Fine-tuning from %s' % checkpoint_path)
+
+  return slim.assign_from_checkpoint_fn(
+      checkpoint_path,
+      variables_to_restore,
+      ignore_missing_vars=FLAGS.ignore_missing_vars)
+
+
+def _get_variables_to_train():
+  """Returns a list of variables to train.
+
+      Returns:
+        A list of variables to train by the optimizer.
+      """
+  if FLAGS.trainable_scopes is None:
+    return tf.trainable_variables()
+  else:
+    scopes = [scope.strip() for scope in FLAGS.trainable_scopes.split(',')]
+
+  variables_to_train = []
+  for scope in scopes:
+    variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope)
+    variables_to_train.extend(variables)
+  return variables_to_train
+
+
+def main(_):
+  if not FLAGS.dataset_dir:
+    raise ValueError('You must supply the dataset directory with --dataset_dir')
+
+  tf.logging.set_verbosity(tf.logging.INFO)
+  with tf.Graph().as_default():
+    # Config model_deploy 
+    deploy_config = model_deploy.DeploymentConfig(
+        num_clones=FLAGS.num_clones,
+        clone_on_cpu=FLAGS.clone_on_cpu,
+        replica_id=FLAGS.task,
+        num_replicas=FLAGS.worker_replicas,
+        num_ps_tasks=FLAGS.num_ps_tasks)
+
+    # Create global_step
+    with tf.device(deploy_config.variables_device()):
+      global_step = slim.create_global_step()
+
+    # Select the dataset #
+    dataset = dataset_factory.get_dataset(FLAGS.dataset_name,
+                                          FLAGS.dataset_split_name,
+                                          FLAGS.dataset_dir)
+
+    # Select the network
+    network_fn = nets_factory.get_network_fn(
+        FLAGS.model_name,
+        num_classes=(dataset.num_classes - FLAGS.labels_offset),
+        weight_decay=FLAGS.weight_decay,
+        is_training=True)
+
+    # Select the preprocessing function
+    preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
+    image_preprocessing_fn = preprocessing_factory.get_preprocessing(
+        preprocessing_name, is_training=True)
+
+    # Create a dataset provider that loads data from the dataset #
+
+    with tf.device(deploy_config.inputs_device()):
+      provider = slim.dataset_data_provider.DatasetDataProvider(
+          dataset,
+          num_readers=FLAGS.num_readers,
+          common_queue_capacity=20 * FLAGS.batch_size,
+          common_queue_min=10 * FLAGS.batch_size)
+      [image, label] = provider.get(['image', 'label'])
+      label = image
+      # todo(bdd) : imagewise labels
+      # label -= FLAGS.labels_offset
+      train_image_size = FLAGS.train_image_size or network_fn.default_image_size
+      image, label = image_preprocessing_fn(image, label, train_image_size,
+                                            train_image_size)
+      images, labels = tf.train.batch(
+          [image, label],
+          batch_size=FLAGS.batch_size,
+          num_threads=FLAGS.num_preprocessing_threads,
+          capacity=5 * FLAGS.batch_size)
+
+      #labels = slim.one_hot_encoding(labels, dataset.num_classes)
+      batch_queue = slim.prefetch_queue.prefetch_queue(
+          [images, labels], capacity=2 * deploy_config.num_clones)
+
+    # Define the model #
+    def clone_fn(batch_queue):
+      """Allows data parallelism by creating multiple clones of network_fn."""
+      images, labels = batch_queue.dequeue()
+      logits, end_points = network_fn(images)
+      print("=" * 40 + ">images<" + "=" * 40)
+      print(images)
+      print("=" * 40 + ">labels<" + "=" * 40)
+      print(labels)
+      print("=" * 40 + ">logits<" + "=" * 40)
+      print(logits)
+      tf.contrib.losses.softmax_cross_entropy(
+          logits, labels, label_smoothing=FLAGS.label_smoothing, weights=1.0)
+      return end_points
+
+    # Gather initial summaries.
+    summaries = set(tf.get_collection(tf.GraphKeys.SUMMARIES))
+
+    clones = model_deploy.create_clones(deploy_config, clone_fn, [batch_queue])
+    clone_scope = deploy_config.clone_scope(0)
+    # Gather update_ops from the first clone. These contain, for example,
+    # the updates for batch_norm variables created by network_fn.
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, clone_scope)
+
+    # Add summaries for end_points.
+    end_points = clones[0].outputs
+    for end_point in end_points:
+      x = end_points[end_point]
+      summaries.add(tf.summary.histogram('activations_' + end_point, x))
+      summaries.add(
+          tf.summary.scalar('sparsity_' + end_point, tf.nn.zero_fraction(x)))
+
+    # Add summaries for losses.
