@@ -8,4 +8,5 @@ This is a collection of semantic image segmentation models implemented in Tensor
 
 Generic
 
-- [ ] [ADE20K S
+- [ ] [ADE20K Scene Parsing](https://groups.csail.mit.edu/vision/datasets/ADE20K/) : [paper](https://arxiv.org/pdf/1608.05442.pdf)
+- [ ] [Microsoft COCO: Common Object
