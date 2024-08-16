@@ -16,4 +16,11 @@ Generic
 
 Medical
 
-- [ ] MICCAI - Brain Tumor Image Segmentat
+- [ ] MICCAI - Brain Tumor Image Segmentation Challenge (BRATS)
+- [ ] MICCAI - Ischemic Stroke Lesion Segmentation (ISLES)
+
+## Networks & Models
+
+Generic 
+
+- [ ] [DeepLab v2](http://arxi
