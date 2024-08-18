@@ -24,4 +24,6 @@ Medical
 Generic 
 
 - [ ] [DeepLab v2](http://arxiv.org/abs/1412.7062) : [project](http://liangchiehchen.com/projects/DeepLab.html) : [C++ code](https://bitbucket.org/deeplab/deeplab-public/)
-- 
+- [ ] [RefineNet](https://arxiv.org/abs/1611.06612) : [MATLAB code](https://github.com/guosheng/refinenet)
+- [ ] [I-FCN](https://arxiv.org/abs/1611.08986) 
+- [ ] [FC-Dens
