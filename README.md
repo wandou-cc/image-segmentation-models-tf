@@ -26,4 +26,5 @@ Generic
 - [ ] [DeepLab v2](http://arxiv.org/abs/1412.7062) : [project](http://liangchiehchen.com/projects/DeepLab.html) : [C++ code](https://bitbucket.org/deeplab/deeplab-public/)
 - [ ] [RefineNet](https://arxiv.org/abs/1611.06612) : [MATLAB code](https://github.com/guosheng/refinenet)
 - [ ] [I-FCN](https://arxiv.org/abs/1611.08986) 
-- [ ] [FC-Dens
+- [ ] [FC-DenseNet](https://arxiv.org/abs/1611.09326) : [theano, lasagne code](https://github.com/SimJeg/FC-DenseNet)
+- [ ] [PixelNet](https://arxiv.org/abs/1609.06694) : [caf
