@@ -23,4 +23,5 @@ Medical
 
 Generic 
 
-- [ ] [DeepLab v2](http://arxi
+- [ ] [DeepLab v2](http://arxiv.org/abs/1412.7062) : [project](http://liangchiehchen.com/projects/DeepLab.html) : [C++ code](https://bitbucket.org/deeplab/deeplab-public/)
+- 
