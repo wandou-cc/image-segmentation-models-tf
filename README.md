@@ -28,4 +28,8 @@ Generic
 - [ ] [I-FCN](https://arxiv.org/abs/1611.08986) 
 - [ ] [FC-DenseNet](https://arxiv.org/abs/1611.09326) : [theano, lasagne code](https://github.com/SimJeg/FC-DenseNet)
 - [ ] [PixelNet](https://arxiv.org/abs/1609.06694) : [cafffe code](https://github.com/endernewton/PixelNet)
-- [ ] [FCN](http://arxiv.org/abs/1411.4038) : [slides](https://docs.google.com/presentation/d/1VeWFMpZ8XN
+- [ ] [FCN](http://arxiv.org/abs/1411.4038) : [slides](https://docs.google.com/presentation/d/1VeWFMpZ8XN7OC3URZP4WdXvOGYckoFWGVN7hApoXVnc) 
+- [ ] [SegNet](http://arxiv.org/abs/1505.07293) : [caffe code](https://github.com/alexgkendall/caffe-segnet)
+
+Medical
+
