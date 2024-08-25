@@ -48,4 +48,5 @@ See `./scipts/`
 
 Learn
 
-1. [TensorFlow Deep Learning Course](https://www
+1. [TensorFlow Deep Learning Course](https://www.udacity.com/course/deep-learning--ud730) Get hands on right away with tensorflow and deep learning.
+2. [Machine Learning, Andrew Ng](https:
