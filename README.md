@@ -41,4 +41,11 @@ See `./scipts/`
 
 ## Requirements
 
-- Python 2.7
+- Python 2.7 
+- [TensorFlow](https://www.tensorflow.org/get_started/os_setup) `0.12+` 
+
+## Resources
+
+Learn
+
+1. [TensorFlow Deep Learning Course](https://www
