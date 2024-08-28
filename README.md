@@ -50,4 +50,5 @@ Learn
 
 1. [TensorFlow Deep Learning Course](https://www.udacity.com/course/deep-learning--ud730) Get hands on right away with tensorflow and deep learning.
 2. [Machine Learning, Andrew Ng](https://www.coursera.org/learn/machine-learning) Deeper dive into basics, less hands . 
-3. [Stanford CS231n](https://cs231n.github.io/) [videos](htt
+3. [Stanford CS231n](https://cs231n.github.io/) [videos](https://www.youtube.com/playlist?list=PLkt2uSq6rBVctENoVBg1TpCC7OQi31AlC) I can't overstate how fantastic the notes, and videos are.  
+4. [Deep Learning 
