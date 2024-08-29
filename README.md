@@ -52,4 +52,4 @@ Learn
 2. [Machine Learning, Andrew Ng](https://www.coursera.org/learn/machine-learning) Deeper dive into basics, less hands . 
 3. [Stanford CS231n](https://cs231n.github.io/) [videos](https://www.youtube.com/playlist?list=PLkt2uSq6rBVctENoVBg1TpCC7OQi31AlC) I can't overstate how fantastic the notes, and videos are.  
 4. [Deep Learning : Book](http://www.deeplearningbook.org/) Helpful reference for filling in gaps.
-5. Above papers, starting with [Fully Convo
+5. Above papers, starting with [Fully Convolutional Networks for Semantic Segmentation](https://arxiv.org/abs/1411.4038) and [video](http://techtalks.tv/talks/fully-convolutional-network
