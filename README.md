@@ -57,4 +57,5 @@ Learn
 Code
 
 - [TF-Slim](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim)
-- [TF-Sl
+- [TF-Slim : Classification Networks](https://github.com/tensorflow/models/tree/master/slim)
+- [imagenet-multiGPU.torch](https://git
