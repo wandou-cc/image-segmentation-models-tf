@@ -60,4 +60,4 @@ Code
 - [TF-Slim : Classification Networks](https://github.com/tensorflow/models/tree/master/slim)
 - [imagenet-multiGPU.torch](https://github.com/soumith/imagenet-multiGPU.torch)
 - [pixel-cnn++](https://github.com/openai/pixel-cnn)
-- NVIDIA Digits [Semantic Segmentaiton Example](https://gi
+- NVIDIA Digits [Semantic Segmentaiton Example](https://github.com/NVIDIA/DIGITS/tree/master/examples/semantic-segmentation) [Medical Imaging Example](https://github.com/NVIDIA/DIGITS/tree/master/example
