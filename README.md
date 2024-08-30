@@ -64,4 +64,4 @@ Code
 
 ## Contributing
 
-Everyone is welcome to contribute. Please follow the [PEP-8](https://www.python.org/dev/peps/pep-0008/), [google
+Everyone is welcome to contribute. Please follow the [PEP-8](https://www.python.org/dev/peps/pep-0008/), [google style](https://google.github.io/styleguide/pyguide.html) with 2 space idents [🤦️](https://www.tensorflow.org/how_tos/style_guide).
